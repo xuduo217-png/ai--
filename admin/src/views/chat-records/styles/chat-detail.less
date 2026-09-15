@@ -1,0 +1,141 @@
+/**
+ * 聊天记录详情弹窗样式
+ * 微信风格聊天 UI
+ */
+
+// ==================== 对话框容器样式 ====================
+.chat-detail-dialog {
+  // 确保弹窗正常显示
+  position: fixed !important;
+
+  .el-dialog {
+    // 确保对话框正常定位
+    position: fixed !important;
+    margin-top: 0 !important;
+    margin-left: 0 !important;
+  }
+
+  .el-dialog__body {
+    padding: 0;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+
+  // 对话框内容区域
+  .dialog-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  // 对话框头部操作区（导出按钮等）
+  .dialog-header-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 16px 20px;
+    border-bottom: 1px solid #e4e7ed;
+  }
+}
+
+// ==================== 消息气泡动画 ====================
+// 消息进入动画
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ==================== 响应式断点 ====================
+// 大屏幕（≥1920px）
+@media screen and (min-width: 1920px) {
+  .chat-detail-dialog {
+    .el-dialog {
+      width: 1000px !important;
+    }
+  }
+}
+
+// 默认屏幕（1440px-1919px）
+@media screen and (min-width: 1440px) and (max-width: 1919px) {
+  .chat-detail-dialog {
+    .el-dialog {
+      width: 900px !important;
+    }
+  }
+}
+
+// 中等屏幕（1024px-1439px）
+@media screen and (min-width: 1024px) and (max-width: 1439px) {
+  .chat-detail-dialog {
+    .el-dialog {
+      width: 800px !important;
+    }
+  }
+}
+
+// 小屏幕（<1024px）
+@media screen and (max-width: 1023px) {
+  .chat-detail-dialog {
+    .el-dialog {
+      width: 95vw !important;
+    }
+  }
+}
+
+// ==================== 滚动条美化 ====================
+.custom-scrollbar {
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f5f5f5;
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #e0e0e0 0%, #bdbdbd 100%);
+    border-radius: 3px;
+    transition: background 0.3s;
+
+    &:hover {
+      background: linear-gradient(180deg, #bdbdbd 0%, #9e9e9e 100%);
+    }
+  }
+}
+
+// ==================== 骨架屏动画 ====================
+@keyframes pulse {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+// ==================== 加载状态 ====================
+.loading-skeleton {
+  background: linear-gradient(90deg, #f2f2f2 25%, #e6e6e6 50%, #f2f2f2 75%);
+  background-size: 200% 100%;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+// ==================== 导出相关样式 ====================
+.export-dropdown {
+  .el-dropdown-menu__item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    .el-icon {
+      font-size: 16px;
+    }
+  }
+}

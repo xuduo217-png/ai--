@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android 12+ controls the launch screen through the system splash API. -->
+    <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowSplashScreenBackground">#0062FB</item>
+        <item name="android:windowSplashScreenIconBackgroundColor">@android:color/transparent</item>
+        <!-- Android 12 places this drawable inside a masked safe area. It is a
+             transparent, padded version of the launch logo rather than the
+             square app icon, so the logo keeps its original colors and shape. -->
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_logo</item>
+        <item name="android:statusBarColor">#0062FB</item>
+        <item name="android:navigationBarColor">#0062FB</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+    </style>
+</resources>

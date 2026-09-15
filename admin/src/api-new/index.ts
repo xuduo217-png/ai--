@@ -1,0 +1,35 @@
+/**
+ * API 统一导出
+ * 所有新的 API 接口都通过这个文件导出
+ */
+
+// 导出各个模块
+export * from './auth'
+export * from './users'
+export * from './shop'
+export * from './upload'
+export * from './hospitals'
+export * from './doctors'
+export * from './departments'
+export * from './health-articles'
+export * from './health-appointments'
+export * from './pet-categories'
+export * from './ai-self-check'
+export * from './ai-diagnosis-reports'
+export * from './auto-reply'
+export * from './chat-records'
+export * from './system-configs'
+export * from './system-articles'
+export * from './statistics'
+export * from './friends'
+export * from './lost-found'
+export * from './charity'
+export * from './activities'
+export * from './logistics'
+export * from './orders'
+export * from './after-sales'
+export * from './wallet/wallet'
+export * from './wallet-withdrawals'
+export * from './moderation'
+export * from './sensitive-words'
+export * from './types'

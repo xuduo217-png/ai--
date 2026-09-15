@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>个人中心淡蓝版设计稿</title>
+    <style>
+      @font-face {
+        font-family: "Material Icons";
+        src: url("../rnapp/node_modules/@react-native-vector-icons/material-icons/fonts/MaterialIcons.ttf") format("truetype");
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        background: #f7faff;
+        font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+        letter-spacing: 0;
+      }
+
+      .screen {
+        position: relative;
+        width: 1024px;
+        height: 1536px;
+        overflow: hidden;
+        background: #f7faff;
+      }
+
+      .design {
+        display: block;
+        width: 1024px;
+        height: 1398px;
+        object-fit: fill;
+      }
+
+      .tab-bar {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        height: 138px;
+        padding: 16px 38px 18px;
+        border-top: 1px solid #e3ebf5;
+        background: rgba(255, 255, 255, 0.99);
+        box-shadow: 0 -10px 28px rgba(60, 98, 145, 0.08);
+      }
+
+      .seam-mask {
+        position: absolute;
+        top: 1382px;
+        right: 0;
+        left: 0;
+        height: 16px;
+        background: #f7faff;
+      }
+
+      .tab {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        color: #7d8998;
+        font-size: 24px;
+        font-weight: 500;
+        line-height: 1;
+      }
+
+      .icon {
+        font-family: "Material Icons";
+        font-size: 44px;
+        font-weight: normal;
+        font-style: normal;
+        line-height: 1;
+        letter-spacing: normal;
+        text-transform: none;
+        white-space: nowrap;
+        -webkit-font-feature-settings: "liga";
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .tab.active {
+        color: #3988e8;
+        font-weight: 650;
+      }
+
+      .tab.active::before {
+        content: "";
+        position: absolute;
+        top: -16px;
+        width: 48px;
+        height: 5px;
+        border-radius: 0 0 5px 5px;
+        background: #3988e8;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="screen">
+      <img class="design" src="./personal-center-redesign-light-blue-v2.png" alt="个人中心主体设计" />
+      <div class="seam-mask" aria-hidden="true"></div>
+      <nav class="tab-bar" aria-label="底部导航">
+        <div class="tab"><span class="icon">home</span><span>首页</span></div>
+        <div class="tab"><span class="icon">shopping_bag</span><span>商城</span></div>
+        <div class="tab"><span class="icon">chat_bubble_outline</span><span>消息</span></div>
+        <div class="tab"><span class="icon">group</span><span>好友</span></div>
+        <div class="tab active"><span class="icon">person_outline</span><span>我的</span></div>
+      </nav>
+    </main>
+  </body>
+</html>

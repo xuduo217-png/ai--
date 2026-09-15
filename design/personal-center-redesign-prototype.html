@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>个人中心改版原型</title>
+    <style>
+      @font-face {
+        font-family: "Material Icons";
+        src: url("../rnapp/node_modules/@react-native-vector-icons/material-icons/fonts/MaterialIcons.ttf") format("truetype");
+      }
+
+      :root {
+        --ink: #1f2926;
+        --muted: #7a8581;
+        --line: #e8ecea;
+        --canvas: #f3f6f4;
+        --paper: #ffffff;
+        --coral: #f06f5f;
+        --coral-soft: #fff0ec;
+        --green: #2f9e79;
+        --green-deep: #183f37;
+        --gold: #d99b37;
+        --blue: #4a85c7;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        background: var(--canvas);
+        color: var(--ink);
+        font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+        letter-spacing: 0;
+      }
+
+      button {
+        font: inherit;
+      }
+
+      .screen {
+        position: relative;
+        width: 456px;
+        height: 972px;
+        margin: 0 auto;
+        overflow: hidden;
+        background: var(--canvas);
+      }
+
+      .material-icons {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-family: "Material Icons";
+        font-weight: normal;
+        font-style: normal;
+        line-height: 1;
+        letter-spacing: normal;
+        text-transform: none;
+        white-space: nowrap;
+        direction: ltr;
+        -webkit-font-feature-settings: "liga";
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .top-shell {
+        height: 178px;
+        padding: 10px 20px 0;
+        background: #fff9f6;
+        border-bottom: 1px solid #f1e8e3;
+      }
+
+      .status-bar {
+        display: flex;
+        height: 26px;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 2px;
+        color: #202724;
+        font-size: 14px;
+        font-weight: 650;
+      }
+
+      .status-icons {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+
+      .signal {
+        display: flex;
+        align-items: flex-end;
+        gap: 2px;
+        height: 13px;
+      }
+
+      .signal i {
+        display: block;
+        width: 3px;
+        border-radius: 1px;
+        background: #202724;
+      }
+
+      .signal i:nth-child(1) { height: 5px; }
+      .signal i:nth-child(2) { height: 7px; }
+      .signal i:nth-child(3) { height: 10px; }
+      .signal i:nth-child(4) { height: 13px; }
+
+      .battery {
+        position: relative;
+        width: 23px;
+        height: 11px;
+        border: 1.5px solid #202724;
+        border-radius: 3px;
+      }
+
+      .battery::before {
+        content: "";
+        position: absolute;
+        inset: 2px;
+        border-radius: 1px;
+        background: #202724;
+      }
+
+      .battery::after {
+        content: "";
+        position: absolute;
+        right: -3px;
+        top: 3px;
+        width: 2px;
+        height: 4px;
+        border-radius: 0 1px 1px 0;
+        background: #202724;
+      }
+
+      .nav-title {
+        display: flex;
+        height: 44px;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        font-weight: 680;
+      }
+
+      .profile {
+        display: grid;
+        grid-template-columns: 60px 1fr auto;
+        gap: 13px;
+        align-items: center;
+        padding-top: 9px;
+      }
+
+      .avatar {
+        width: 60px;
+        height: 60px;
+        border: 3px solid #ffffff;
+        border-radius: 50%;
+        object-fit: cover;
+        box-shadow: 0 3px 14px rgba(34, 50, 44, 0.12);
+      }
+
+      .profile-name {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-bottom: 7px;
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .female {
+        color: #e55e85;
+        font-size: 18px;
+        font-weight: 600;
+      }
+
+      .member {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .member::before {
+        content: "";
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--coral);
+      }
+
+      .edit-profile {
+        display: flex;
+        height: 34px;
+        align-items: center;
+        gap: 2px;
+        padding: 0 10px 0 12px;
+        border: 1px solid #efd8d1;
+        border-radius: 17px;
+        background: rgba(255, 255, 255, 0.75);
+        color: #b75b50;
+        font-size: 13px;
+      }
+
+      .edit-profile .material-icons {
+        font-size: 16px;
+      }
+
+      .content {
+        position: absolute;
+        inset: 178px 0 72px;
+        overflow: hidden;
+        padding: 12px 14px 18px;
+      }
+
+      .wallet {
+        height: 126px;
+        padding: 14px 16px 15px;
+        border-radius: 8px;
+        background: var(--green-deep);
+        box-shadow: 0 8px 22px rgba(24, 63, 55, 0.13);
+        color: #ffffff;
+      }
+
+      .wallet-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 24px;
+      }
+
+      .wallet-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 15px;
+        font-weight: 650;
+      }
+
+      .wallet-title .material-icons {
+        color: #ffb8a8;
+        font-size: 20px;
+      }
+
+      .wallet-link {
+        display: flex;
+        align-items: center;
+        gap: 1px;
+        color: #cfe0db;
+        font-size: 12px;
+      }
+
+      .wallet-link .material-icons {
+        font-size: 16px;
+      }
+
+      .wallet-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        margin-top: 14px;
+      }
+
+      .wallet-stat {
+        position: relative;
+        text-align: center;
+      }
+
+      .wallet-stat + .wallet-stat::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 2px;
+        width: 1px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.16);
+      }
+
+      .wallet-label {
+        margin-bottom: 6px;
+        color: #b9cec8;
+        font-size: 11px;
+      }
+
+      .wallet-value {
+        color: #ffffff;
+        font-size: 15px;
+        font-variant-numeric: tabular-nums;
+        font-weight: 680;
+      }
+
+      .wallet-stat:nth-child(2) .wallet-value {
+        color: #ffd28a;
+      }
+
+      .menu-group {
+        margin-top: 10px;
+        overflow: hidden;
+        border: 1px solid #edf0ee;
+        border-radius: 8px;
+        background: var(--paper);
+      }
+
+      .menu-row {
+        position: relative;
+        display: grid;
+        grid-template-columns: 38px 1fr 20px;
+        min-height: 54px;
+        align-items: center;
+        padding: 7px 10px 7px 12px;
+      }
+
+      .menu-row + .menu-row::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 12px;
+        left: 50px;
+        height: 1px;
+        background: var(--line);
+      }
+
+      .menu-icon {
+        display: flex;
+        width: 30px;
+        height: 30px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 7px;
+        background: var(--coral-soft);
+        color: var(--coral);
+      }
+
+      .menu-icon .material-icons {
+        font-size: 19px;
+      }
+
+      .menu-row:nth-child(3n + 2) .menu-icon {
+        background: #edf7f3;
+        color: var(--green);
+      }
+
+      .menu-row:nth-child(3n) .menu-icon {
+        background: #eef4fb;
+        color: var(--blue);
+      }
+
+      .menu-copy {
+        min-width: 0;
+      }
+
+      .menu-title {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: #2b3431;
+        font-size: 14px;
+        font-weight: 620;
+        line-height: 18px;
+      }
+
+      .unread-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #ef554f;
+        box-shadow: 0 0 0 2px #fff0ef;
+      }
+
+      .menu-subtitle {
+        margin-top: 2px;
+        overflow: hidden;
+        color: #8b9591;
+        font-size: 11px;
+        line-height: 14px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .chevron {
+        color: #b7bfbc;
+        font-size: 20px;
+      }
+
+      .settings-row {
+        min-height: 51px;
+      }
+
+      .settings-row .menu-icon {
+        background: #f0f2f1;
+        color: #5f6c67;
+      }
+
+      .tab-bar {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        height: 72px;
+        padding: 7px 8px 11px;
+        border-top: 1px solid #e6eae8;
+        background: rgba(255, 255, 255, 0.98);
+        box-shadow: 0 -5px 20px rgba(29, 47, 40, 0.06);
+      }
+
+      .tab {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        color: #848d89;
+        font-size: 11px;
+      }
+
+      .tab .material-icons {
+        font-size: 24px;
+      }
+
+      .tab.active {
+        color: var(--coral);
+        font-weight: 650;
+      }
+
+      .tab.active::before {
+        content: "";
+        position: absolute;
+        top: -7px;
+        width: 24px;
+        height: 3px;
+        border-radius: 0 0 3px 3px;
+        background: var(--coral);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Throwaway prototype: one polished direction for the personal center redesign. -->
+    <main class="screen">
+      <header class="top-shell">
+        <div class="status-bar">
+          <span>08:17</span>
+          <div class="status-icons" aria-hidden="true">
+            <span class="signal"><i></i><i></i><i></i><i></i></span>
+            <span class="material-icons" style="font-size: 16px">wifi</span>
+            <span class="battery"></span>
+          </div>
+        </div>
+        <div class="nav-title">个人中心</div>
+        <section class="profile">
+          <img class="avatar" src="./personal-center-avatar.png" alt="用户头像" />
+          <div>
+            <div class="profile-name">测试武杰 <span class="female">♀</span></div>
+            <div class="member">普通会员</div>
+          </div>
+          <button class="edit-profile" type="button">
+            编辑资料
+            <span class="material-icons">chevron_right</span>
+          </button>
+        </section>
+      </header>
+
+      <section class="content">
+        <section class="wallet">
+          <div class="wallet-head">
+            <div class="wallet-title"><span class="material-icons">account_balance_wallet</span>我的钱包</div>
+            <div class="wallet-link">查看钱包<span class="material-icons">chevron_right</span></div>
+          </div>
+          <div class="wallet-stats">
+            <div class="wallet-stat">
+              <div class="wallet-label">可用余额</div>
+              <div class="wallet-value">¥100010.00</div>
+            </div>
+            <div class="wallet-stat">
+              <div class="wallet-label">待审核</div>
+              <div class="wallet-value">¥0.00</div>
+            </div>
+            <div class="wallet-stat">
+              <div class="wallet-label">累计收益</div>
+              <div class="wallet-value">¥100010.00</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="menu-group">
+          <div class="menu-row">
+            <div class="menu-icon"><span class="material-icons">pets</span></div>
+            <div class="menu-copy"><div class="menu-title">我的宠物</div><div class="menu-subtitle">添加和管理您的宠物信息</div></div>
+            <span class="material-icons chevron">chevron_right</span>
+          </div>
+          <div class="menu-row">
+            <div class="menu-icon"><span class="material-icons">shopping_bag</span></div>
+            <div class="menu-copy"><div class="menu-title">商城订单</div><div class="menu-subtitle">查看全部商城订单</div></div>
+            <span class="material-icons chevron">chevron_right</span>
+          </div>
+          <div class="menu-row">
+            <div class="menu-icon"><span class="material-icons">medical_services</span></div>
+            <div class="menu-copy"><div class="menu-title">医疗服务</div><div class="menu-subtitle">查看医疗服务订单</div></div>
+            <span class="material-icons chevron">chevron_right</span>
+          </div>
+        </section>
+
+        <section class="menu-group">
+          <div class="menu-row">
+            <div class="menu-icon"><span class="material-icons">location_on</span></div>
+            <div class="menu-copy"><div class="menu-title">收货地址</div><div class="menu-subtitle">管理您的收货地址</div></div>
+            <span class="material-icons chevron">chevron_right</span>
+          </div>
+          <div class="menu-row">
+            <div class="menu-icon"><span class="material-icons">notifications_none</span></div>
+            <div class="menu-copy"><div class="menu-title">通知消息<span class="unread-dot"></span></div><div class="menu-subtitle">查看系统通知和消息</div></div>
+            <span class="material-icons chevron">chevron_right</span>
+          </div>
+          <div class="menu-row">
+            <div class="menu-icon"><span class="material-icons">confirmation_number</span></div>
+            <div class="menu-copy"><div class="menu-title">我的优惠券</div><div class="menu-subtitle">查看我的优惠券</div></div>
+            <span class="material-icons chevron">chevron_right</span>
+          </div>
+          <div class="menu-row">
+            <div class="menu-icon"><span class="material-icons">favorite_border</span></div>
+            <div class="menu-copy"><div class="menu-title">我的收藏</div><div class="menu-subtitle">查看收藏的商品</div></div>
+            <span class="material-icons chevron">chevron_right</span>
+          </div>
+          <div class="menu-row">
+            <div class="menu-icon"><span class="material-icons">storefront</span></div>
+            <div class="menu-copy"><div class="menu-title">我发布商品</div><div class="menu-subtitle">查看我发布的商品</div></div>
+            <span class="material-icons chevron">chevron_right</span>
+          </div>
+        </section>
+
+        <section class="menu-group" style="margin-top: 9px">
+          <div class="menu-row settings-row">
+            <div class="menu-icon"><span class="material-icons">settings</span></div>
+            <div class="menu-copy"><div class="menu-title">设置</div><div class="menu-subtitle">账号、安全与通用设置</div></div>
+            <span class="material-icons chevron">chevron_right</span>
+          </div>
+        </section>
+      </section>
+
+      <nav class="tab-bar">
+        <div class="tab"><span class="material-icons">home</span><span>首页</span></div>
+        <div class="tab"><span class="material-icons">shopping_bag</span><span>商城</span></div>
+        <div class="tab"><span class="material-icons">chat_bubble_outline</span><span>消息</span></div>
+        <div class="tab"><span class="material-icons">group</span><span>好友</span></div>
+        <div class="tab active"><span class="material-icons">person</span><span>我的</span></div>
+      </nav>
+    </main>
+  </body>
+</html>
