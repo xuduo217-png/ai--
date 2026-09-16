@@ -69,6 +69,12 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
+
+# flutter_html 3.0.0 still calls html/src/query_selector.matches, which was
+# removed in html 0.15.7. Keep the compatible parser until flutter_html ships
+# its public-selector API migration.
+dependency_overrides:
+  html: 0.15.6
   sqflite_common_ffi: ^2.4.0+3
 
 tobias:
