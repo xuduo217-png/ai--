@@ -19,7 +19,7 @@ async function bootstrapAcceptanceSchema() {
     password: process.env.DB_PASSWORD || "",
     database,
     entities: [join(__dirname, "..", "src", "**", "*.entity{.ts,.js}")],
-    synchronize: true,
+    synchronize: false,
     logging: false,
   });
 
