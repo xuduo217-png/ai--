@@ -1,8 +1,8 @@
-import { ConfigService } from '@nestjs/config';
-import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { join } from 'path';
+import { ConfigService } from "@nestjs/config";
+import { TypeOrmModuleOptions } from "@nestjs/typeorm";
+import { join } from "path";
 
-type ConfigReader = Pick<ConfigService, 'get'>;
+type ConfigReader = Pick<ConfigService, "get">;
 
 function getNumberConfig(
   configService: ConfigReader,
@@ -21,16 +21,16 @@ function getBooleanConfig(
 ): boolean {
   const rawValue = configService.get<string | boolean | undefined>(key);
 
-  if (typeof rawValue === 'boolean') {
+  if (typeof rawValue === "boolean") {
     return rawValue;
   }
 
-  if (typeof rawValue === 'string') {
+  if (typeof rawValue === "string") {
     const normalized = rawValue.trim().toLowerCase();
-    if (normalized === 'true') {
+    if (normalized === "true") {
       return true;
     }
-    if (normalized === 'false') {
+    if (normalized === "false") {
       return false;
     }
   }
@@ -45,44 +45,52 @@ function getBooleanConfig(
 export function createDatabaseOptions(
   configService: ConfigReader,
 ): TypeOrmModuleOptions {
-  const poolSize = getNumberConfig(configService, 'DB_POOL_SIZE', 20);
+  const poolSize = getNumberConfig(configService, "DB_POOL_SIZE", 20);
+  const environment = configService.get<string>("NODE_ENV", "development");
+  const database = configService.get<string>("DB_DATABASE", "pet_hospitals");
+
+  if (environment === "acceptance" && !database.endsWith("_acceptance")) {
+    throw new Error(
+      "Acceptance environment requires an isolated database ending in _acceptance",
+    );
+  }
 
   return {
-    type: 'mysql',
-    host: configService.get('DB_HOST', 'localhost'),
-    port: getNumberConfig(configService, 'DB_PORT', 3306),
-    username: configService.get('DB_USERNAME', 'root'),
-    password: configService.get('DB_PASSWORD', ''),
-    database: configService.get('DB_DATABASE', 'pet_hospitals'),
-    entities: [join(__dirname, '..', '**', '*.entity{.ts,.js}')],
+    type: "mysql",
+    host: configService.get("DB_HOST", "localhost"),
+    port: getNumberConfig(configService, "DB_PORT", 3306),
+    username: configService.get("DB_USERNAME", "root"),
+    password: configService.get("DB_PASSWORD", ""),
+    database,
+    entities: [join(__dirname, "..", "**", "*.entity{.ts,.js}")],
     // 生产配置目前可能仍使用 development 标识，任何环境都禁止自动改表。
     synchronize: false,
-    logging: configService.get('NODE_ENV') !== 'production',
-    retryAttempts: getNumberConfig(configService, 'DB_RETRY_ATTEMPTS', 3),
-    retryDelay: getNumberConfig(configService, 'DB_RETRY_DELAY', 3000),
+    logging: configService.get("NODE_ENV") !== "production",
+    retryAttempts: getNumberConfig(configService, "DB_RETRY_ATTEMPTS", 3),
+    retryDelay: getNumberConfig(configService, "DB_RETRY_DELAY", 3000),
     poolSize,
-    connectTimeout: getNumberConfig(configService, 'DB_CONNECT_TIMEOUT', 10000),
+    connectTimeout: getNumberConfig(configService, "DB_CONNECT_TIMEOUT", 10000),
     extra: {
       waitForConnections: getBooleanConfig(
         configService,
-        'DB_WAIT_FOR_CONNECTIONS',
+        "DB_WAIT_FOR_CONNECTIONS",
         true,
       ),
       maxIdle: getNumberConfig(
         configService,
-        'DB_MAX_IDLE',
+        "DB_MAX_IDLE",
         Math.min(poolSize, 10),
       ),
-      idleTimeout: getNumberConfig(configService, 'DB_IDLE_TIMEOUT', 60000),
-      queueLimit: getNumberConfig(configService, 'DB_QUEUE_LIMIT', 0),
+      idleTimeout: getNumberConfig(configService, "DB_IDLE_TIMEOUT", 60000),
+      queueLimit: getNumberConfig(configService, "DB_QUEUE_LIMIT", 0),
       enableKeepAlive: getBooleanConfig(
         configService,
-        'DB_ENABLE_KEEP_ALIVE',
+        "DB_ENABLE_KEEP_ALIVE",
         true,
       ),
       keepAliveInitialDelay: getNumberConfig(
         configService,
-        'DB_KEEP_ALIVE_INITIAL_DELAY',
+        "DB_KEEP_ALIVE_INITIAL_DELAY",
         0,
       ),
     },

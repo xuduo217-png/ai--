@@ -13,6 +13,7 @@ import '../../activity/domain/activity_models.dart';
 import '../../activity/presentation/pages/activity_detail_page.dart';
 import '../../activity/presentation/pages/activity_list_page.dart';
 import '../../agent/presentation/agent_home_view.dart';
+import '../../agent/domain/agent_models.dart';
 import '../../auth/domain/auth_models.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../chat/data/chat_repository.dart';
@@ -137,6 +138,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   late final MallController _mallController;
   late final ProfileController? _profileController;
   late HomeTab _activeTab;
+  AgentHomeContext? _agentHome;
+  String? _agentSessionId;
+  bool _routingAgentMessage = false;
 
   @override
   void initState() {
@@ -161,6 +165,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         : widget.profileControllerFactory!(widget.authController!);
     _controller.load();
     _mallController.load();
+    if (!widget.guest && widget.gateway is AgentGateway) {
+      unawaited(_loadAgentHome());
+    }
     unawaited(widget.friendsSession?.start());
     unawaited(widget.marketplaceSession?.start());
     unawaited(widget.consultationSession?.start());
@@ -341,6 +348,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   String get _agentPetName {
+    final agentPetName = _agentHome?.primaryPet?.name.trim();
+    if (agentPetName != null && agentPetName.isNotEmpty) return agentPetName;
     final profile = widget.session?.profile;
     final value = profile?['petName'] ?? profile?['defaultPetName'];
     if (value is String && value.trim().isNotEmpty) return value.trim();
@@ -365,30 +374,59 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     );
   }
 
-  void _handleAgentPrompt(String prompt) {
-    final normalized = prompt.toLowerCase();
-    if (normalized.contains('商城') ||
-        normalized.contains('商品') ||
-        normalized.contains('主粮') ||
-        normalized.contains('购物车') ||
-        normalized.contains('订单')) {
-      _changeTab(HomeTab.mall);
+  Future<void> _loadAgentHome() async {
+    final gateway = widget.gateway;
+    if (gateway is! AgentGateway) return;
+    final agentGateway = gateway as AgentGateway;
+    try {
+      final home = await agentGateway.loadAgentHome();
+      if (mounted) {
+        setState(() {
+          _agentHome = home;
+          _agentSessionId = home.activeSessionId;
+        });
+      }
+    } on Object {
+      // 首页其他正式模块仍可使用，Agent 请求时会显示明确错误。
+    }
+  }
+
+  Future<void> _handleAgentPrompt(String prompt) async {
+    if (_routingAgentMessage) return;
+    final gateway = widget.gateway;
+    if (widget.guest || gateway is! AgentGateway) {
+      _showLoginConfirm('登录后即可使用小谷 Agent');
       return;
     }
-    if (normalized.contains('宠友') ||
-        normalized.contains('社区') ||
-        normalized.contains('领养') ||
-        normalized.contains('活动')) {
-      _openCommunity();
-      return;
+    final agentGateway = gateway as AgentGateway;
+    setState(() => _routingAgentMessage = true);
+    try {
+      final result = await agentGateway.routeAgentMessage(
+        prompt,
+        petId: _agentHome?.primaryPet?.id,
+        sessionId: _agentSessionId,
+      );
+      if (!mounted) return;
+      _agentSessionId = result.sessionId;
+      switch (result.intent) {
+        case AgentIntent.shop:
+        case AgentIntent.order:
+          _changeTab(HomeTab.mall);
+        case AgentIntent.community:
+          _openCommunity();
+        case AgentIntent.appointment:
+          _openHealth();
+        case AgentIntent.health:
+          _openAiDiagnosisList();
+      }
+    } on Object catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('小谷暂时无法处理：$error')));
+    } finally {
+      if (mounted) setState(() => _routingAgentMessage = false);
     }
-    if (normalized.contains('预约') ||
-        normalized.contains('疫苗') ||
-        normalized.contains('医院')) {
-      _openHealth();
-      return;
-    }
-    _openAiDiagnosisList();
   }
 
   void _openFeature(String label, {bool loginRequired = false}) {

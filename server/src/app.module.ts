@@ -24,6 +24,7 @@ import { SmsModule } from './sms/sms.module';
 import { SystemConfigsModule } from './system-configs/system-configs.module';
 import { AuditModule } from './audit/audit.module';
 import { PaymentModule } from './payment/payment.module';
+import { AgentModule } from './agent/agent.module';
 import { HealthArticlesModule } from './health-articles/health-articles.module';
 import { AidGuidesModule } from './aid-guides/aid-guides.module';
 import { AddressesModule } from './addresses/addresses.module';
@@ -75,6 +76,7 @@ import { createDatabaseOptions } from './config/database.config';
     SystemConfigsModule,
     AuditModule,
     PaymentModule,
+    AgentModule,
     HealthArticlesModule,
     AidGuidesModule,
     AddressesModule,

@@ -26,6 +26,7 @@ docs/plans/*
 # Local configuration, credentials and runtime output
 .env
 .env.*
+!server/.env.acceptance.example
 !.env.example
 !admin/.env.base
 !admin/.env.dev

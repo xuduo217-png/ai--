@@ -1,6 +1,6 @@
-import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import Redis from 'ioredis';
+import { Injectable, Logger, OnModuleDestroy } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import Redis from "ioredis";
 
 /**
  * Redis 服务
@@ -14,37 +14,38 @@ export class RedisService implements OnModuleDestroy {
   constructor(private configService: ConfigService) {
     // 创建 Redis 客户端实例
     this.client = new Redis({
-      host: this.configService.get('REDIS_HOST', 'localhost'),
-      port: this.configService.get('REDIS_PORT', 6379),
-      password: this.configService.get('REDIS_PASSWORD'),
+      host: this.configService.get("REDIS_HOST", "localhost"),
+      port: this.configService.get("REDIS_PORT", 6379),
+      password: this.configService.get("REDIS_PASSWORD"),
+      db: this.configService.get<number>("REDIS_DB", 0),
       // 启用键空间通知以支持过期事件
       enableReadyCheck: true,
       lazyConnect: false,
     });
 
     // 连接成功事件
-    this.client.on('connect', () => {
-      this.logger.log('Redis 连接成功');
+    this.client.on("connect", () => {
+      this.logger.log("Redis 连接成功");
     });
 
     // 连接就绪事件
-    this.client.on('ready', () => {
-      this.logger.log('Redis 就绪');
+    this.client.on("ready", () => {
+      this.logger.log("Redis 就绪");
     });
 
     // 连接错误事件
-    this.client.on('error', (err) => {
-      this.logger.error('Redis 连接错误', err);
+    this.client.on("error", (err) => {
+      this.logger.error("Redis 连接错误", err);
     });
 
     // 连接关闭事件
-    this.client.on('close', () => {
-      this.logger.warn('Redis 连接关闭');
+    this.client.on("close", () => {
+      this.logger.warn("Redis 连接关闭");
     });
 
     // 重新连接事件
-    this.client.on('reconnecting', () => {
-      this.logger.log('Redis 正在重新连接...');
+    this.client.on("reconnecting", () => {
+      this.logger.log("Redis 正在重新连接...");
     });
   }
 
@@ -224,8 +225,12 @@ export class RedisService implements OnModuleDestroy {
    * @param pattern 匹配模式
    * @param count 每次扫描数量（建议值）
    */
-  async scan(cursor: string, pattern: string, count: number = 100): Promise<[string, string[]]> {
-    return this.client.scan(cursor, 'MATCH', pattern, 'COUNT', count);
+  async scan(
+    cursor: string,
+    pattern: string,
+    count: number = 100,
+  ): Promise<[string, string[]]> {
+    return this.client.scan(cursor, "MATCH", pattern, "COUNT", count);
   }
 
   /**
@@ -261,6 +266,6 @@ export class RedisService implements OnModuleDestroy {
    */
   async onModuleDestroy(): Promise<void> {
     await this.client.quit();
-    this.logger.log('Redis 连接已关闭');
+    this.logger.log("Redis 连接已关闭");
   }
 }

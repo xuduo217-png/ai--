@@ -17,6 +17,35 @@
 
 ---
 
+## Agent 聚合接口
+
+以下接口用于正式 Flutter Agent 首页，均要求用户 JWT，且只允许访问当前用户自己的宠物档案。
+
+### 获取 Agent 首页上下文
+
+- `GET /agent/home`
+- 角色：`USER`
+- 返回：`primaryPet`、固定业务入口 `actions`、基于真实宠物档案生成的 `memory`。
+- 用户没有宠物时 `primaryPet` 和 `memory` 为 `null`，客户端应引导建立宠物档案。
+
+### 识别请求并返回业务目标
+
+- `POST /agent/route`
+- 角色：`USER`
+- 请求体：`{ "message": "帮团团预约周末疫苗", "petId": 12 }`
+- `petId` 可选；传入时服务端会校验宠物归属。
+- 返回意图：`HEALTH`、`SHOP`、`APPOINTMENT`、`COMMUNITY`、`ORDER`。
+- 返回 `destination` 供客户端进入现有正式业务页面，客户端不得自行用关键词决定目标模块。
+- 返回 `sessionId`、用户消息 ID 和 Agent 消息 ID；消息已经写入独立 Agent 会话表。
+
+### Agent 会话记录
+
+- `GET /agent/sessions`：获取当前用户最近 50 个会话。
+- `GET /agent/sessions/:sessionId/messages`：获取指定会话最多 200 条消息。
+- 服务端按 JWT 用户校验会话归属，不能读取其他用户的会话。
+
+---
+
 ## 目录
 
 1. [Auth 模块](#auth-模块) - 认证与授权

@@ -2,6 +2,7 @@ import '../../../core/network/api_client.dart';
 import '../../../core/network/asset_url_resolver.dart';
 import '../../activity/data/activity_repository.dart';
 import '../../activity/domain/activity_models.dart';
+import '../../agent/domain/agent_models.dart';
 import '../../charity/data/charity_repository.dart';
 import '../../charity/domain/charity_models.dart';
 import '../../community/data/community_repository.dart';
@@ -32,7 +33,8 @@ class HomeRepository
         ActivityGateway,
         LostFoundGateway,
         CommunityGateway,
-        CouponScanGateway {
+        CouponScanGateway,
+        AgentGateway {
   HomeRepository(this._apiClient)
     : _activityRepository = ActivityRepository(_apiClient),
       _charityRepository = CharityRepository(_apiClient),
@@ -55,6 +57,30 @@ class HomeRepository
 
   EmergencyRepository get _emergencyRepository {
     return EmergencyRepository(_apiClient);
+  }
+
+  @override
+  Future<AgentHomeContext> loadAgentHome() async {
+    final response = await _apiClient.get('/agent/home');
+    return AgentHomeContext.fromJson(_asMap(response));
+  }
+
+  @override
+  Future<AgentRouteResult> routeAgentMessage(
+    String message, {
+    int? petId,
+    String? sessionId,
+  }) async {
+    final response = await _apiClient.post(
+      '/agent/route',
+      authenticated: true,
+      body: <String, Object?>{
+        'message': message,
+        'petId': ?petId,
+        'sessionId': ?sessionId,
+      },
+    );
+    return AgentRouteResult.fromJson(_asMap(response));
   }
 
   @override
