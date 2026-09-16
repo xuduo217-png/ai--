@@ -78,37 +78,281 @@ class _PreviewShellState extends State<_PreviewShell> {
       const _MessagePreviewPage(),
       const _ProfilePreviewPage(),
     ];
-    return Scaffold(
-      body: IndexedStack(index: _index, children: pages),
-      bottomNavigationBar: NavigationBar(
-        height: 68,
-        backgroundColor: const Color(0xFFFBFAF7),
-        indicatorColor: const Color(0xFFE5E9E3),
-        selectedIndex: _index,
-        onDestinationSelected: (value) => setState(() => _index = value),
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.auto_awesome_outlined),
-            selectedIcon: Icon(Icons.auto_awesome_rounded),
-            label: '小谷',
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final desktop = constraints.maxWidth >= 900;
+        if (desktop) {
+          return ColoredBox(
+            color: const Color(0xFFECEEE9),
+            child: Center(
+              child: Container(
+                constraints: const BoxConstraints(maxWidth: 1180),
+                margin: const EdgeInsets.all(18),
+                clipBehavior: Clip.antiAlias,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF7F7F4),
+                  borderRadius: BorderRadius.circular(28),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x24504D45),
+                      blurRadius: 70,
+                      offset: Offset(0, 24),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    _DesktopSidebar(
+                      selectedIndex: _index,
+                      onSelected: (value) => setState(() => _index = value),
+                    ),
+                    Expanded(
+                      child: IndexedStack(index: _index, children: pages),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+        return Scaffold(
+          body: IndexedStack(index: _index, children: pages),
+          bottomNavigationBar: NavigationBar(
+            height: 68,
+            backgroundColor: const Color(0xFFFBFAF7),
+            indicatorColor: const Color(0xFFE5E9E3),
+            selectedIndex: _index,
+            onDestinationSelected: (value) => setState(() => _index = value),
+            destinations: const [
+              NavigationDestination(
+                icon: Icon(Icons.auto_awesome_outlined),
+                selectedIcon: Icon(Icons.auto_awesome_rounded),
+                label: '小谷',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.people_alt_outlined),
+                selectedIcon: Icon(Icons.people_alt_rounded),
+                label: '宠友',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.chat_bubble_outline_rounded),
+                selectedIcon: Icon(Icons.chat_bubble_rounded),
+                label: '消息',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.person_outline_rounded),
+                selectedIcon: Icon(Icons.person_rounded),
+                label: '我的',
+              ),
+            ],
           ),
-          NavigationDestination(
-            icon: Icon(Icons.people_alt_outlined),
-            selectedIcon: Icon(Icons.people_alt_rounded),
-            label: '宠友',
+        );
+      },
+    );
+  }
+}
+
+class _DesktopSidebar extends StatelessWidget {
+  const _DesktopSidebar({
+    required this.selectedIndex,
+    required this.onSelected,
+  });
+
+  final int selectedIndex;
+  final ValueChanged<int> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 232,
+      padding: const EdgeInsets.fromLTRB(17, 28, 17, 20),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(right: BorderSide(color: Color(0xFFE8EAE6))),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Row(
+            children: [
+              CircleAvatar(
+                radius: 19,
+                backgroundColor: Color(0xFF202F29),
+                child: Text(
+                  'G',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              SizedBox(width: 11),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '谷德E宠',
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
+                  ),
+                  Text(
+                    '懂宠物，也懂你',
+                    style: TextStyle(fontSize: 11, color: Color(0xFF949B96)),
+                  ),
+                ],
+              ),
+            ],
           ),
-          NavigationDestination(
-            icon: Icon(Icons.chat_bubble_outline_rounded),
-            selectedIcon: Icon(Icons.chat_bubble_rounded),
+          const SizedBox(height: 28),
+          FilledButton.icon(
+            onPressed: () => onSelected(0),
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFF202F29),
+              minimumSize: const Size.fromHeight(48),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+            icon: const Icon(Icons.add_rounded),
+            label: const Text('新对话'),
+          ),
+          const SizedBox(height: 25),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 9),
+            child: Text(
+              '最近对话',
+              style: TextStyle(fontSize: 11, color: Color(0xFF9AA19C)),
+            ),
+          ),
+          const SizedBox(height: 8),
+          _SidebarConversation(
+            text: '团团最近软便怎么办',
+            selected: selectedIndex == 0,
+            onTap: () => onSelected(0),
+          ),
+          const _SidebarConversation(text: '挑选适合的主粮'),
+          const _SidebarConversation(text: '预约周末疫苗'),
+          const _SidebarConversation(text: '查询商城订单'),
+          const Spacer(),
+          _SidebarNavItem(
+            icon: Icons.people_alt_outlined,
+            label: '宠友圈',
+            selected: selectedIndex == 1,
+            onTap: () => onSelected(1),
+          ),
+          _SidebarNavItem(
+            icon: Icons.chat_bubble_outline_rounded,
             label: '消息',
+            selected: selectedIndex == 2,
+            onTap: () => onSelected(2),
           ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline_rounded),
-            selectedIcon: Icon(Icons.person_rounded),
+          _SidebarNavItem(
+            icon: Icons.person_outline_rounded,
             label: '我的',
+            selected: selectedIndex == 3,
+            onTap: () => onSelected(3),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            padding: const EdgeInsets.all(11),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF5F6F2),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Row(
+              children: [
+                CircleAvatar(
+                  radius: 18,
+                  backgroundColor: Color(0xFFEAD7B7),
+                  child: Icon(Icons.pets_rounded, color: Color(0xFF765D36)),
+                ),
+                SizedBox(width: 10),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '团团',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    Text(
+                      '柯基 · 2岁 · 5.8kg',
+                      style: TextStyle(fontSize: 10, color: Color(0xFF7D857F)),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _SidebarConversation extends StatelessWidget {
+  const _SidebarConversation({
+    required this.text,
+    this.selected = false,
+    this.onTap,
+  });
+
+  final String text;
+  final bool selected;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: selected ? const Color(0xFFF1F2EE) : Colors.transparent,
+      borderRadius: BorderRadius.circular(11),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(11),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          child: Text(
+            text,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: selected
+                  ? const Color(0xFF202522)
+                  : const Color(0xFF69716C),
+              fontSize: 12,
+              fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SidebarNavItem extends StatelessWidget {
+  const _SidebarNavItem({
+    required this.icon,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      dense: true,
+      selected: selected,
+      selectedTileColor: const Color(0xFFF1F2EE),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(11)),
+      leading: Icon(icon, size: 19),
+      title: Text(label, style: const TextStyle(fontSize: 12)),
+      onTap: onTap,
     );
   }
 }
