@@ -13,6 +13,7 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/src/main.js",
     "seed": "ts-node -r tsconfig-paths/register src/seeds/seed.cli.ts",
+    "schema:acceptance": "ts-node -r tsconfig-paths/register scripts/bootstrap-acceptance-schema.ts",
     "generate-password": "ts-node -r tsconfig-paths/register scripts/generate-password.ts",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
