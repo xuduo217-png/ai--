@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
+
 import '../../../core/widgets/app_permission_dialog.dart';
 
 import 'package:flutter/foundation.dart';
@@ -11,6 +12,7 @@ import 'package:pet_hospital_flutter/core/widgets/app_dialog.dart';
 import '../../activity/domain/activity_models.dart';
 import '../../activity/presentation/pages/activity_detail_page.dart';
 import '../../activity/presentation/pages/activity_list_page.dart';
+import '../../agent/presentation/agent_home_view.dart';
 import '../../auth/domain/auth_models.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../chat/data/chat_repository.dart';
@@ -35,7 +37,6 @@ import '../../friends/presentation/conversation_list_view.dart';
 import '../../friends/friends_feature_session.dart';
 import '../../friends/domain/friend_messaging_models.dart';
 import '../../friends/presentation/friend_chat_page.dart';
-import '../../friends/presentation/friends_list_view.dart';
 import '../../health/domain/health_models.dart';
 import '../../health/presentation/pages/ai_diagnosis_pages.dart';
 import '../../health/presentation/pages/consultation_list_page.dart';
@@ -255,28 +256,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   Widget _buildTabContent() {
     return switch (_activeTab) {
-      HomeTab.medical => AnimatedBuilder(
-        animation: _mallController,
-        builder: (context, _) => MedicalHomeView(
-          controller: _controller,
-          homeImageUrl: _mallController.snapshot.homePopupImageUrl,
-          onRefresh: () async {
-            await Future.wait([
-              _controller.refresh(),
-              _mallController.refresh(),
-            ]);
-          },
-          guest: widget.guest,
-          onLoginRequired: _showLoginConfirm,
-          onOpenFeature: _openFeature,
-          onConsultDoctor: _openChat,
-          onOpenDoctor: _openDoctorDetail,
-          onOpenActivity: _openHomeActivity,
-          onScan: _openScanner,
-          onSearch: _openMallSearch,
-          onNotification: _openNotifications,
-          notificationUnreadCount: widget.notificationBadgeController,
-        ),
+      HomeTab.medical => AgentHomeView(
+        petName: _agentPetName,
+        onPrompt: _handleAgentPrompt,
+        onHealth: _openAiDiagnosisList,
+        onShop: () => _changeTab(HomeTab.mall),
+        onAppointment: _openHealth,
+        onCommunity: _openCommunity,
       ),
       HomeTab.mall => MallHomeView(
         controller: _mallController,
@@ -324,13 +310,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 controller: widget.friendsSession!.messagingController,
                 onOpenConversation: _openFriendConversation,
               ),
-      HomeTab.friends =>
-        widget.friendsSession == null
-            ? const _SecondaryTabView(
-                title: '好友',
-                icon: Icons.people_outline_rounded,
-              )
-            : FriendsListView(session: widget.friendsSession!),
+      HomeTab.friends => _buildCommunityTab(),
       HomeTab.profile =>
         widget.profileNavigation != null && _profileController != null
             ? ProfilePage(
@@ -358,6 +338,57 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       return;
     }
     setState(() => _activeTab = tab);
+  }
+
+  String get _agentPetName {
+    final profile = widget.session?.profile;
+    final value = profile?['petName'] ?? profile?['defaultPetName'];
+    if (value is String && value.trim().isNotEmpty) return value.trim();
+    return '我的宠物';
+  }
+
+  Widget _buildCommunityTab() {
+    final gateway = widget.gateway;
+    if (gateway is! CommunityGateway) {
+      return const _SecondaryTabView(
+        title: '宠友',
+        icon: Icons.people_alt_outlined,
+      );
+    }
+    return CommunityHomePage(
+      gateway: gateway as CommunityGateway,
+      authenticated: !widget.guest,
+      currentUserId: _currentUserId,
+      currentUserAvatarUrl: _currentUserAvatarUrl,
+      requestLogin: _showLoginConfirm,
+      friendsSession: widget.friendsSession,
+    );
+  }
+
+  void _handleAgentPrompt(String prompt) {
+    final normalized = prompt.toLowerCase();
+    if (normalized.contains('商城') ||
+        normalized.contains('商品') ||
+        normalized.contains('主粮') ||
+        normalized.contains('购物车') ||
+        normalized.contains('订单')) {
+      _changeTab(HomeTab.mall);
+      return;
+    }
+    if (normalized.contains('宠友') ||
+        normalized.contains('社区') ||
+        normalized.contains('领养') ||
+        normalized.contains('活动')) {
+      _openCommunity();
+      return;
+    }
+    if (normalized.contains('预约') ||
+        normalized.contains('疫苗') ||
+        normalized.contains('医院')) {
+      _openHealth();
+      return;
+    }
+    _openAiDiagnosisList();
   }
 
   void _openFeature(String label, {bool loginRequired = false}) {
@@ -423,6 +454,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       ..showSnackBar(SnackBar(content: Text(label)));
   }
 
+  // Kept for the legacy medical-home widget while the Agent migration lands.
+  // ignore: unused_element
   void _openChat(HomeDoctor doctor) {
     _openChatTarget(
       doctorId: doctor.id,
@@ -677,6 +710,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     );
   }
 
+  // ignore: unused_element
   void _openHomeActivity(HomeActivity activity) {
     final gateway = widget.gateway;
     if (gateway is! ActivityGateway) {
@@ -698,6 +732,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     );
   }
 
+  // ignore: unused_element
   Future<void> _openScanner() async {
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
@@ -882,6 +917,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       ..showSnackBar(const SnackBar(content: Text('营养师服务暂不可用，请稍后重试')));
   }
 
+  // ignore: unused_element
   void _openDoctorDetail(HomeDoctor doctor) {
     final gateway = widget.gateway;
     if (gateway is! DoctorDirectoryGateway) {
@@ -998,6 +1034,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     await _refreshMallAfterRoute();
   }
 
+  // ignore: unused_element
   Future<void> _openNotifications() async {
     if (widget.guest) {
       await _showLoginConfirm('登录后即可查看通知消息');
@@ -2431,10 +2468,9 @@ class HomeBottomBar extends StatelessWidget {
   final int pendingFriendRequestCount;
 
   static const _items = <_BottomTabItem>[
-    _BottomTabItem(HomeTab.medical, '首页', Icons.home),
-    _BottomTabItem(HomeTab.mall, '商城', Icons.shopping_bag),
+    _BottomTabItem(HomeTab.medical, '小谷', Icons.auto_awesome_rounded),
     _BottomTabItem(HomeTab.messages, '消息', Icons.chat_bubble_outline),
-    _BottomTabItem(HomeTab.friends, '好友', Icons.people),
+    _BottomTabItem(HomeTab.friends, '宠友', Icons.people_alt_outlined),
     _BottomTabItem(HomeTab.profile, '我的', Icons.person),
   ];
 
@@ -2442,15 +2478,15 @@ class HomeBottomBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: const Color(0xFFFBFAF7),
         borderRadius: BorderRadius.vertical(
-          top: Radius.circular(_s(context, 20)),
+          top: Radius.circular(_s(context, 18)),
         ),
         boxShadow: const [
           BoxShadow(
-            color: Color(0x1A000000),
-            offset: Offset(0, -5),
-            blurRadius: 10,
+            color: Color(0x0F26332C),
+            offset: Offset(0, -3),
+            blurRadius: 18,
           ),
         ],
       ),
@@ -2496,7 +2532,7 @@ class _BottomTabButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = selected ? const Color(0xFF3B82F6) : const Color(0xFF6B7280);
+    final color = selected ? const Color(0xFF202F29) : const Color(0xFF929892);
     return InkWell(
       key: ValueKey('home-tab-${item.tab.name}'),
       onTap: onTap,
